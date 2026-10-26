@@ -1,0 +1,22 @@
+# Node.js dependencies
+node_modules/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Logs
+logs/
+*.log
+
+# Generated reports
+generated-reports/
+temp/
+
+# Test coverage
+coverage/
+
+# OS files
+.DS_Store
+Thumbs.db
