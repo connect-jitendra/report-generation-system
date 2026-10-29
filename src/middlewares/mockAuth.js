@@ -10,7 +10,7 @@ async function mockAuth(req, res, next) {
             });
         }
 
-        const { userId } = req.body;
+        const userId = req.body?.userId ?? Number(req.headers["x-user-id"]);
 
         if (!Number.isSafeInteger(userId) || userId <= 0) {
             return res.status(400).json({

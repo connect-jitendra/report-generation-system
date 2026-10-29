@@ -1,4 +1,4 @@
-import { insertReport } from "../repositories/report.repository.js";
+import { insertReport, findReportById } from "../repositories/report.repository.js";
 import reportQueue from "../queues/report.queue.js";
 
 const createReportService = async (userId, reportType, format) => {
@@ -12,4 +12,14 @@ const createReportService = async (userId, reportType, format) => {
     return report;
 };
 
-export default createReportService;
+const getReportByIdService = async (reportId) => {
+    const result = await findReportById(reportId);
+    if(!result){
+        throw new Error("Report not found");
+    }
+    return result;
+
+
+};
+
+export { createReportService, getReportByIdService };
