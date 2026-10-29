@@ -1,17 +1,32 @@
 import "dotenv/config";
 import { Worker } from "bullmq";
-import { findReportById, updateReportStatus } from "../repositories/report.repository.js";
+import {
+    findReportById,
+    updateReportStatus,
+    findAllUsers,
+} from "../repositories/report.repository.js";
+import generateCSV from "../generators/csv.generator.js";
+import { writeFile } from "node:fs/promises";
 
 const reportWorker = new Worker(
     "report-generation",
     async (job) => {
         const { reportId } = job.data;
+
+        console.log(`0.Processing report job: ${job.id}`);
+        console.log("1. Report Id:", reportId);
+
         const report = await findReportById(reportId);
-        const updateStatus = await updateReportStatus(reportId,"PROCESSING")
-        console.log("Report_status", updateStatus);
-        console.log("Report Details :", report);
-        console.log("Report Id :", reportId);
-        console.log(`Processing report job: ${job.id}`);
+        console.log("2.Report Details:", report);
+
+        const updateStatus = await updateReportStatus(reportId, "PROCESSING");
+        console.log("3. Report Status:", updateStatus.status);
+
+        const allUsersReport = await findAllUsers();
+        console.log("4.Total users fetched:", allUsersReport.length);
+
+        const csvData = await generateCSV(allUsersReport);
+        console.log("5.CSV Data:", csvData);
     },
     {
         connection: {

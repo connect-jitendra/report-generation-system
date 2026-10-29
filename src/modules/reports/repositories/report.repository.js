@@ -33,4 +33,12 @@ const updateReportStatus = async (reportId, status) => {
   return result.rows[0];
 };
 
-export { insertReport, findReportById, updateReportStatus };
+const findAllUsers = async () => {
+  const result = await pool.query(
+    "SELECT id,name,email,role FROM users;"
+  )
+
+  return result.rows;
+};
+
+export { insertReport, findReportById, updateReportStatus,findAllUsers };
