@@ -22,3 +22,7 @@ coverage/
 Thumbs.db
 
 coding-practice.js
+
+
+# Generated reports
+generated-reports/
