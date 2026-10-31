@@ -1,0 +1,63 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Generation Dashboard</title>
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <main class="container">
+        <h1>Report Generation System</h1>
+        <p class="subtitle">Generate and track reports using our Express API.</p>
+
+        <section class="card">
+            <h2>Create Report</h2>
+
+            <form id="reportForm">
+                <label for="userId">Select User</label>
+                <select id="userId">
+                    <option value="101">Rahul — Admin</option>
+                    <option value="102">Priya — Manager</option>
+                    <option value="103">Amit — User</option>
+                    <option value="104">Neha — Manager</option>
+                    <option value="105">Rohit — User</option>
+                </select>
+
+                <label for="reportType">Report Type</label>
+                <select id="reportType">
+                    <option value="users">Users</option>
+                </select>
+
+                <label for="format">File Format</label>
+                <select id="format">
+                    <option value="csv">CSV</option>
+                </select>
+
+                <button type="submit">Generate Report</button>
+            </form>
+        </section>
+
+        <section class="card">
+            <h2>Check Report Status</h2>
+
+            <label for="reportId">Report ID</label>
+            <input
+                type="text"
+                id="reportId"
+                placeholder="Enter report UUID"
+            >
+
+            <button id="checkStatus">Check Status</button>
+        </section>
+
+        <section class="card">
+            <h2>API Response</h2>
+            <pre id="result">No request sent yet.</pre>
+        </section>
+    </main>
+
+    <script src="./script.js"></script>
+</body>
+</html>
