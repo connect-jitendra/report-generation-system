@@ -1,7 +1,7 @@
-
 import express from "express";
 import testRoutes from "./routes/test.routes.js";
 import reportRoutes from "./modules/reports/routes/report.routes.js";
+import errorHandler from "./middlewares/errorHandler.js";
 
 const app = express();
 
@@ -20,5 +20,9 @@ app.get("/health", (req, res) => {
 // Register application routes under their respective API prefixes.
 app.use("/api", testRoutes);
 app.use("/api/reports", reportRoutes);
+
+
+//Error Middleware
+app.use(errorHandler);
 
 export default app;

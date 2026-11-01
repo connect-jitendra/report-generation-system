@@ -1,6 +1,7 @@
 
 import { insertReport, findReportById } from "../repositories/report.repository.js";
 import reportQueue from "../queues/report.queue.js";
+import AppError from "../../../utils/AppError.js";
 
 // Create a report record and enqueue a background job for report generation.
 // The API can respond immediately without waiting for the report to be generated.
@@ -23,7 +24,7 @@ const getReportByIdService = async (reportId) => {
 
     // Throw an error so the controller can return HTTP 404.
     if (!result) {
-        throw new Error("Report not found");
+        throw new AppError("Report not found", 404);
     }
 
     return result;
