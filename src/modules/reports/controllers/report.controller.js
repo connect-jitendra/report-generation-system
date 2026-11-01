@@ -1,4 +1,3 @@
-
 import AppError from "../../../utils/AppError.js";
 
 import {
@@ -13,48 +12,14 @@ const createReport = async (req, res, next) => {
     try {
         const { reportType, format } = req.body ?? {};
 
-        // Validate required fields before creating a report request.
-        if (!reportType || !format) {
-            throw new AppError("reportType and format are required", 400);
-        }
-
-        // Restrict requests to supported report formats.
-        if (!["csv", "xlsx"].includes(format)) {
-            throw new AppError(
-                "Invalid format. Allowed formats: csv, xlsx",
-                400
-            );
-        }
-
-        // Restrict requests to supported report types.
-        if (!["users", "departments", "categories"].includes(reportType)) {
-            throw new AppError(
-                "Invalid report type. Allowed types: users, departments, categories",
-                400
-            );
-        }
-
-        // Only users CSV reports are implemented in the current worker.
-        if (reportType !== "users" || format !== "csv") {
-            throw new AppError(
-                "Currently only users CSV reports are supported",
-                400
-            );
-        }
-
         // Delegate report creation and background job scheduling to the service layer.
-        const report = await createReportService(
-            req.user.id,
-            reportType,
-            format
-        );
+        const report = await createReportService(req.user.id, reportType, format);
 
         return res.status(201).json({
             success: true,
             message: "Report request created successfully",
             data: report,
         });
-
     } catch (error) {
         return next(error);
     }
@@ -81,7 +46,6 @@ const getReportByIdController = async (req, res, next) => {
             message: "Report retrieved successfully",
             data: report,
         });
-
     } catch (error) {
         return next(error);
     }
@@ -102,10 +66,7 @@ const downloadReportController = async (req, res, next) => {
 
         // Only completed reports with an S3 key can be downloaded.
         if (report.status !== "COMPLETED" || !report.s3_key) {
-            throw new AppError(
-                "Report is not ready for download",
-                409
-            );
+            throw new AppError("Report is not ready for download", 409);
         }
 
         // Generate a time-limited URL for direct download from the private S3 bucket.
@@ -116,14 +77,9 @@ const downloadReportController = async (req, res, next) => {
             message: "Download URL generated successfully",
             data: downloadUrl,
         });
-
     } catch (error) {
         return next(error);
     }
 };
 
-export {
-    createReport,
-    getReportByIdController,
-    downloadReportController
-};
+export { createReport, getReportByIdController, downloadReportController };
