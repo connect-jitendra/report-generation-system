@@ -1,8 +1,10 @@
+
 import AppError from "../../../utils/AppError.js";
 
 import {
     createReportService,
     getReportByIdService,
+    getAllReportByUser,
 } from "../services/report.service.js";
 
 import { generateReportDownloadUrl } from "../services/reportStorage.service.js";
@@ -82,4 +84,34 @@ const downloadReportController = async (req, res, next) => {
     }
 };
 
-export { createReport, getReportByIdController, downloadReportController };
+
+const getAllReportController = async (req, res, next) => {
+    try {
+        const reports = await getAllReportByUser(req.user.id);
+
+        if (reports.length === 0) {
+            return res.status(200).json({
+                success: true,
+                message: "No report created yet",
+                data: reports
+            })
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "All reports fetched.",
+            data: reports
+        })
+
+    } catch (error) {
+        return next(error);
+    }
+};
+
+
+export {
+    createReport,
+    getReportByIdController,
+    downloadReportController,
+    getAllReportController,
+};

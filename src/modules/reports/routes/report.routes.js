@@ -5,6 +5,7 @@ import authorize from "../../../middlewares/authorize.js";
 import {
   createReport,
   downloadReportController,
+  getAllReportController,
   getReportByIdController,
 } from "../controllers/report.controller.js";
 import validate from "../../../middlewares/validate.js";
@@ -22,6 +23,9 @@ router.post(
   createReport,
 );
 
+//Get all report
+router.get("/",mockAuth,getAllReportController);
+
 // Retrieve report details and current processing status.
 // The controller verifies that the requesting user owns the report.
 router.get("/:reportId", mockAuth, validate(reportIdSchema, "params"), getReportByIdController);
@@ -29,5 +33,7 @@ router.get("/:reportId", mockAuth, validate(reportIdSchema, "params"), getReport
 // Generate a temporary S3 download URL for a completed report.
 // The controller checks ownership and report availability before granting access.
 router.get("/:reportId/download", mockAuth,validate(reportIdSchema, "params"), downloadReportController);
+
+
 
 export default router;

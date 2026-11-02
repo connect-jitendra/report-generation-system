@@ -1,4 +1,3 @@
-
 import pool from "../../../config/db.js";
 
 // Create a new report request and return the inserted record.
@@ -42,9 +41,7 @@ const updateReportStatus = async (reportId, status) => {
 
 // Fetch user records used as the data source for CSV report generation.
 const findAllUsers = async () => {
-  const result = await pool.query(
-    "SELECT id,name,email,role FROM users;"
-  );
+  const result = await pool.query("SELECT id,name,email,role FROM users;");
 
   return result.rows;
 };
@@ -57,10 +54,29 @@ const updateReportS3Key = async (reportId, s3Key) => {
     SET s3_key = $2
     WHERE id   =$1
     RETURNING *
-    `, [reportId, s3Key]
+    `,
+    [reportId, s3Key],
   );
 
   return result.rows[0];
 };
 
-export { insertReport, findReportById, updateReportStatus, findAllUsers, updateReportS3Key };
+//==========================find all report by user================================
+
+const findAllReportByUserId = async (userId) => {
+  const result = await pool.query(
+    "SELECT * FROM reports WHERE user_id= $1 ORDER BY created_at DESC ",
+    [userId],
+  );
+
+  return result.rows;
+};
+
+export {
+  insertReport,
+  findReportById,
+  updateReportStatus,
+  findAllUsers,
+  updateReportS3Key,
+  findAllReportByUserId,
+};
