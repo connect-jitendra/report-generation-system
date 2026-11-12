@@ -1,4 +1,3 @@
-
 import "dotenv/config";
 import { Worker } from "bullmq";
 
@@ -11,6 +10,7 @@ import {
 
 import generateCSV from "../generators/csv.generator.js";
 import { uploadReportToS3 } from "../services/reportStorage.service.js";
+import generateXLSX from "../generators/xlsx.generator.js";
 
 // Process report generation jobs asynchronously using BullMQ and Redis.
 const reportWorker = new Worker(
@@ -23,45 +23,41 @@ const reportWorker = new Worker(
         console.log("1. Report ID:", reportId);
 
         try {
-            // Retrieve the report configuration and validate supported report types.
             const report = await findReportById(reportId);
             console.log("2. Report Details:", report);
 
-            if (report.report_type !== "users" || report.format !== "csv") {
+            if (
+                report.report_type !== "users" ||
+                !["csv", "xlsx"].includes(report.format)
+            ) {
                 throw new Error("Unsupported report type or format");
             }
 
-            // Mark the report as PROCESSING before starting generation.
-            const updateStatus = await updateReportStatus(
-                reportId,
-                "PROCESSING"
-            );
+            const updateStatus = await updateReportStatus(reportId, "PROCESSING");
             console.log("3. Report Status:", updateStatus.status);
 
-            // Fetch report data from PostgreSQL and convert it to CSV format.
             const allUsersReport = await findAllUsers();
             console.log("4. Total users fetched:", allUsersReport.length);
 
-            const csvData = await generateCSV(allUsersReport);
-            console.log("5. CSV Data:", csvData);
+            let fileData;
 
-            // Generate a unique S3 object key to avoid filename conflicts.
-            const s3Key = `reports/users-${reportId}.csv`;
+            if (report.format === "csv") {
+                fileData = await generateCSV(allUsersReport);
+                console.log("5. CSV Data:", fileData);
+            } else {
+                fileData = await generateXLSX(allUsersReport);
+                console.log("6. XLSX generated successfully");
+            }
 
-            // Upload the generated report to the private S3 bucket.
-            await uploadReportToS3(csvData, s3Key);
+            const s3Key = `reports/${report.format}/users-${reportId}.${report.format}`;
 
-            // Save the S3 object key in PostgreSQL for future downloads.
+            await uploadReportToS3(fileData, s3Key, report.format);
+
             await updateReportS3Key(reportId, s3Key);
 
-            // Mark the report COMPLETED only after upload and database updates succeed.
-            const completedReport = await updateReportStatus(
-                reportId,
-                "COMPLETED"
-            );
+            const completedReport = await updateReportStatus(reportId, "COMPLETED");
 
             console.log("6. Report Status:", completedReport.status);
-
         } catch (error) {
             // Mark failed jobs in PostgreSQL and propagate the error to BullMQ.
             console.error("Report generation failed:", error);
