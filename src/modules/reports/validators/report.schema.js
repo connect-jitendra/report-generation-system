@@ -2,7 +2,7 @@ import { z } from "zod";
 
 // Validate the supported report type and output format.
 const createReportSchema = z.object({
-    reportType: z.enum(["users","departments","employee_departments"]),
+    reportType: z.enum(["users","departments","employee_departments","categories"]),
    format: z.enum(["csv","xlsx"])
 });
 

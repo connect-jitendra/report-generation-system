@@ -88,6 +88,20 @@ const findAllEmployeesWithDepartments = async () => {
   return result.rows;
 };
 
+
+//=================FIND ALL CATEGORIES=======================
+const findAllCategories = async () => {
+  const result = await pool.query(
+    `
+    SELECT id , name, description, created_at 
+    FROM categories
+    ORDER BY id;
+    `
+  )
+  return result.rows;
+};
+
+
 export {
   insertReport,
   findReportById,
@@ -95,6 +109,7 @@ export {
   findAllUsers,
   findAllDepartments,
   findAllEmployeesWithDepartments,
+  findAllCategories,
   updateReportS3Key,
   findAllReportByUserId,
 };

@@ -29,6 +29,7 @@ async function seedDatabase() {
         await pool.query(departmentSql);
 
         console.log("[Seed] Departments seeded successfully");
+
         // Assign departments to existing users.
         const userDepartmentFileUrl = new URL(
             "../database/seeds/user_departments.seed.sql",
@@ -40,6 +41,18 @@ async function seedDatabase() {
         await pool.query(userDepartmentSql);
 
         console.log("[Seed] User departments assigned successfully");
+
+        // Seed sample categories.
+        const categoryFileUrl = new URL(
+            "../database/seeds/categories.seed.sql",
+            import.meta.url
+        );
+
+        const categorySql = await readFile(categoryFileUrl, "utf8");
+
+        await pool.query(categorySql);
+
+        console.log("[Seed] Categories seeded successfully");
     } catch (error) {
         console.error("[Seed] Seeding failed:", error.message);
         process.exitCode = 1;

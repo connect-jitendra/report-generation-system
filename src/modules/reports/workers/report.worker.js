@@ -8,6 +8,7 @@ import {
     findAllDepartments,
     findAllEmployeesWithDepartments,
     updateReportS3Key,
+    findAllCategories,
 } from "../repositories/report.repository.js";
 
 import generateCSV from "../generators/csv.generator.js";
@@ -29,7 +30,7 @@ const reportWorker = new Worker(
             console.log("2. Report Details:", report);
 
             if (
-                !["users", "departments", "employee_departments"].includes(report.report_type) ||
+                !["users", "departments", "employee_departments", "categories"].includes(report.report_type) ||
                 !["csv", "xlsx"].includes(report.format)
             ) {
                 throw new Error("Unsupported report type or format");
@@ -48,9 +49,14 @@ const reportWorker = new Worker(
             } else if (report.report_type === "departments") {
                 reportData = await findAllDepartments();
                 console.log("4.1. Total departments fetched:", reportData.length);
+
             } else if (report.report_type === "employee_departments") {
                 reportData = await findAllEmployeesWithDepartments();
                 console.log("4.2 Total Employees with Departments :", reportData.length);
+
+            } else if (report.report_type === "categories") {
+                reportData = await findAllCategories();
+                console.log("Total categories fetched:", reportData.length);
             }
 
             let fileData;
