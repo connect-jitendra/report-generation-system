@@ -1,4 +1,3 @@
-
 import "dotenv/config";
 import { readFile } from "node:fs/promises";
 import pool from "../src/config/db.js";
@@ -12,21 +11,39 @@ async function seedDatabase() {
         // This avoids dependency on the terminal's working directory.
         const fileUrl = new URL(
             "../database/seeds/users.seed.sql",
+            import.meta.url,
+        );
+
+        const sql = await readFile(fileUrl, "utf8");
+        await pool.query(sql);
+        console.log("[Seed] Users seeded successfully");
+
+        // Seed department records after users.
+        const departmentFileUrl = new URL(
+            "../database/seeds/departments.seed.sql",
+            import.meta.url,
+        );
+
+        const departmentSql = await readFile(departmentFileUrl, "utf8");
+
+        await pool.query(departmentSql);
+
+        console.log("[Seed] Departments seeded successfully");
+        // Assign departments to existing users.
+        const userDepartmentFileUrl = new URL(
+            "../database/seeds/user_departments.seed.sql",
             import.meta.url
         );
 
-        // Read and execute the SQL seed script using the PostgreSQL pool.
-        const sql = await readFile(fileUrl, "utf8");
+        const userDepartmentSql = await readFile(userDepartmentFileUrl, "utf8");
 
-        await pool.query(sql);
+        await pool.query(userDepartmentSql);
 
-        console.log("[Seed] Users seeded successfully");
+        console.log("[Seed] User departments assigned successfully");
     } catch (error) {
-        // Report seeding failures and mark the process as unsuccessful.
         console.error("[Seed] Seeding failed:", error.message);
         process.exitCode = 1;
     } finally {
-        // Close database connections even if seeding fails.
         await pool.end();
         console.log("[Seed] Database pool closed");
     }

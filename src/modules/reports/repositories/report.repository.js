@@ -1,7 +1,5 @@
 import pool from "../../../config/db.js";
 
-// Create a new report request and return the inserted record.
-// PostgreSQL applies the default PENDING status and generates the report UUID.
 const insertReport = async (userId, reportType, format) => {
   const result = await pool.query(
     `
@@ -24,8 +22,6 @@ const findReportById = async (reportId) => {
   return result.rows[0];
 };
 
-// Update the report's processing status during its lifecycle.
-// This is used by the background worker for PROCESSING, COMPLETED, and FAILED states.
 const updateReportStatus = async (reportId, status) => {
   const result = await pool.query(
     `UPDATE reports
@@ -39,15 +35,23 @@ const updateReportStatus = async (reportId, status) => {
   return result.rows[0];
 };
 
-// Fetch user records used as the data source for CSV report generation.
+//=================================Find ALL users=======================
 const findAllUsers = async () => {
   const result = await pool.query("SELECT id,name,email,role FROM users;");
 
   return result.rows;
 };
 
-// Persist the S3 object key after a report file has been uploaded successfully.
-// The stored key is later used to generate a secure presigned download URL.
+//==================================FIND ALL DEPARTMENTS=========================
+const findAllDepartments = async () => {
+  const result = await pool.query(
+    `SELECT id, name, description, created_at
+       FROM departments
+      ORDER BY id;`,
+  );
+  return result.rows;
+};
+
 const updateReportS3Key = async (reportId, s3Key) => {
   const result = await pool.query(
     `UPDATE reports
@@ -72,11 +76,25 @@ const findAllReportByUserId = async (userId) => {
   return result.rows;
 };
 
+//==========================FIND ALL DEPARTMENTS===========================
+
+const findAllEmployeesWithDepartments = async () => {
+  const result = await pool.query(`
+    SELECT u.name as employee_name, u.email as employee_email, d.name as department_name FROM users u
+    LEFT JOIN departments d
+    ON u.department_id = d.id
+    ORDER BY u.id;
+    `);
+  return result.rows;
+};
+
 export {
   insertReport,
   findReportById,
   updateReportStatus,
   findAllUsers,
+  findAllDepartments,
+  findAllEmployeesWithDepartments,
   updateReportS3Key,
   findAllReportByUserId,
 };

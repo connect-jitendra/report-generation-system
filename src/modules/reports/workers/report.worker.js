@@ -5,6 +5,8 @@ import {
     findReportById,
     updateReportStatus,
     findAllUsers,
+    findAllDepartments,
+    findAllEmployeesWithDepartments,
     updateReportS3Key,
 } from "../repositories/report.repository.js";
 
@@ -27,7 +29,7 @@ const reportWorker = new Worker(
             console.log("2. Report Details:", report);
 
             if (
-                report.report_type !== "users" ||
+                !["users", "departments", "employee_departments"].includes(report.report_type) ||
                 !["csv", "xlsx"].includes(report.format)
             ) {
                 throw new Error("Unsupported report type or format");
@@ -36,20 +38,32 @@ const reportWorker = new Worker(
             const updateStatus = await updateReportStatus(reportId, "PROCESSING");
             console.log("3. Report Status:", updateStatus.status);
 
-            const allUsersReport = await findAllUsers();
-            console.log("4. Total users fetched:", allUsersReport.length);
+
+            let reportData;
+
+            if (report.report_type === "users") {
+                reportData = await findAllUsers();
+                console.log("4. Total users fetched:", reportData.length);
+
+            } else if (report.report_type === "departments") {
+                reportData = await findAllDepartments();
+                console.log("4.1. Total departments fetched:", reportData.length);
+            } else if (report.report_type === "employee_departments") {
+                reportData = await findAllEmployeesWithDepartments();
+                console.log("4.2 Total Employees with Departments :", reportData.length);
+            }
 
             let fileData;
 
             if (report.format === "csv") {
-                fileData = await generateCSV(allUsersReport);
+                fileData = await generateCSV(reportData);
                 console.log("5. CSV Data:", fileData);
             } else {
-                fileData = await generateXLSX(allUsersReport);
+                fileData = await generateXLSX(reportData, report.report_type);
                 console.log("6. XLSX generated successfully");
             }
 
-            const s3Key = `reports/${report.format}/users-${reportId}.${report.format}`;
+            const s3Key = `reports/${report.format}/${report.report_type}-${reportId}.${report.format}`;
 
             await uploadReportToS3(fileData, s3Key, report.format);
 

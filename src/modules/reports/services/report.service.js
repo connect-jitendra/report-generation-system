@@ -6,13 +6,9 @@ import {
 import reportQueue from "../queues/report.queue.js";
 import AppError from "../../../utils/AppError.js";
 
-// Create a report record and enqueue a background job for report generation.
-// The API can respond immediately without waiting for the report to be generated.
 const createReportService = async (userId, reportType, format) => {
     const report = await insertReport(userId, reportType, format);
 
-    // Add the report ID to the BullMQ queue for asynchronous processing.
-    // The worker uses this ID to fetch report details from PostgreSQL.
     await reportQueue.add("generate-report", {
         reportId: report.id,
     });
@@ -37,11 +33,10 @@ const getAllReportByUser = async (userId) => {
 
     const updatedReport = result.map((report) => ({
         ...report,
-        is_downloadable: !!report.s3_key && report.status === 'COMPLETED',
+        is_downloadable: !!report.s3_key && report.status === "COMPLETED",
     }));
 
     return updatedReport;
 };
-
 
 export { createReportService, getReportByIdService, getAllReportByUser };
